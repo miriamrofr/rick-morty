@@ -10,18 +10,18 @@ function App() {
   let [pageNumber, setPageNumber] = useState(1);
   const [speciesFilter, setSpeciesFilter] = useState('');
 
-  const reqApi = async(filter = '') => {
-    const url = `https://rickandmortyapi.com/api/character/?page=${pageNumber}`;
-    const response = await fetch(url);
-    let characterApi = await response.json();
-  
+  const reqApi = async (filter = '') => {
+    let url = `https://rickandmortyapi.com/api/character/?page=${pageNumber}`;
     if (filter) {
-      characterApi = characterApi.results.filter(character => character.species.toLowerCase() === filter.toLowerCase());
-    } else {
-      characterApi = characterApi.results;
+      url += `&species=${filter}`;
     }
-  
-    setCharacters(characterApi);
+    const response = await fetch(url);
+    const characterApi = await response.json();
+    if (characterApi.results && characterApi.results.length > 0) {
+      setCharacters(characterApi.results);
+    } else {
+      alert('No characters found for this filter');
+    }
   }
 
   useEffect(() => {
