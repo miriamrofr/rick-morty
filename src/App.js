@@ -8,41 +8,48 @@ function App() {
 
   const [characters,setCharacters] = useState([]);
   let [pageNumber, setPageNumber] = useState(1);
+  const [speciesFilter, setSpeciesFilter] = useState('');
 
-  const reqApi = async()=>{
-
-    const api = await fetch(`https://rickandmortyapi.com/api/character/?page=${pageNumber}`);
-    const characterApi = await api.json();
-
-    setCharacters(characterApi.results);
-
+  const reqApi = async(filter = '') => {
+    const url = `https://rickandmortyapi.com/api/character/?page=${pageNumber}`;
+    const response = await fetch(url);
+    let characterApi = await response.json();
+  
+    if (filter) {
+      characterApi = characterApi.results.filter(character => character.species.toLowerCase() === filter.toLowerCase());
+    } else {
+      characterApi = characterApi.results;
+    }
+  
+    setCharacters(characterApi);
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     reqApi();
-  },[pageNumber]);
-  
+  }, [pageNumber]);
 
   return (
     <div className="App">
       <header className="App-header">
         <h1 className="title">Rick & Morty</h1>
-        {characters ? (
-           <>
-          <Characters characters={characters} setCharacters={setCharacters}/>
-          <Pagination setPageNumber = {setPageNumber} pageNumber={pageNumber}/>
-          </>
-          
-        ): (
+        {characters && characters.length > 0 ? (
           <>
-          <img src={imageRickMorty} alt='Rick & Morty' className='img-home'/>
-          <button onClick={reqApi} className='btn-search'>Buscar Personajes</button>
+            <input 
+              type="text" 
+              value={speciesFilter} 
+              onChange={e => setSpeciesFilter(e.target.value)} 
+              placeholder="Filter by species"
+            />
+            <button onClick={() => reqApi(speciesFilter)}>Filter</button>
+            <Characters characters={characters} setCharacters={setCharacters}/>
+            <Pagination setPageNumber = {setPageNumber} pageNumber={pageNumber}/>
           </>
-          
+        ) : (
+          <>
+            <img src={imageRickMorty} alt='Rick & Morty' className='img-home'/>
+            <button onClick={() => reqApi()} className='btn-search'>Buscar Personajes</button>
+          </>
         )}
-        
-        
-        
       </header>
     </div>
   );
